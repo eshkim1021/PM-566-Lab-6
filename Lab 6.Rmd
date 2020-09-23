@@ -41,6 +41,8 @@ mt_samples <- mt_samples %>%
   select(description, medical_specialty, transcription)
 
 head(mt_samples)
+
+mt_samples$transcription[1]
 ```
 
 ---
@@ -53,7 +55,7 @@ We can use `count()` from `dplyr` to figure out how many different catagories do
 mt_samples %>%
   count(medical_specialty, sort = TRUE)
 ```
-There are 40 unique medical specialties in this dataset. Some of these categories are related, as surgery is a very general medical specialty that includes aspects from other medical fields such as cardiology, OB-GYN, and neurosurgery. 
+There are 40 unique medical specialties in this dataset. Some of these categories are related, as surgery is a very general medical specialty that includes aspects from other medical fields such as cardiology, OB-GYN, and neurosurgery. The data is not evenly distributed as surgery was the most common medical specialty. 
 
 ---
 
@@ -64,15 +66,15 @@ There are 40 unique medical specialties in this dataset. Some of these categorie
 - Visualize the top 20 most frequent words
 
 ```{r}
-
 mt_samples %>% 
-  unnest_tokens(token,transcription)
-
-
+  unnest_tokens(token,transcription) %>% 
+  count(token,sort =TRUE)
 ```
 
 Explain what we see from this result. Does it makes sense? What insights (if any) do we get?
 
+
+This result shows the words that appear with the highest frequency in the 
 ---
 
 ## Question 3

@@ -57,6 +57,12 @@ head(mt_samples)
     ## 5 2-D Echocardiogram           Cardiovascular / P~ "1.  The left ventricular ca~
     ## 6 Morbid obesity.  Laparoscop~ Bariatrics          "PREOPERATIVE DIAGNOSIS: , M~
 
+``` r
+mt_samples$transcription[1]
+```
+
+    ## [1] "SUBJECTIVE:,  This 23-year-old white female presents with complaint of allergies.  She used to have allergies when she lived in Seattle but she thinks they are worse here.  In the past, she has tried Claritin, and Zyrtec.  Both worked for short time but then seemed to lose effectiveness.  She has used Allegra also.  She used that last summer and she began using it again two weeks ago.  It does not appear to be working very well.  She has used over-the-counter sprays but no prescription nasal sprays.  She does have asthma but doest not require daily medication for this and does not think it is flaring up.,MEDICATIONS: , Her only medication currently is Ortho Tri-Cyclen and the Allegra.,ALLERGIES: , She has no known medicine allergies.,OBJECTIVE:,Vitals:  Weight was 130 pounds and blood pressure 124/78.,HEENT:  Her throat was mildly erythematous without exudate.  Nasal mucosa was erythematous and swollen.  Only clear drainage was seen.  TMs were clear.,Neck:  Supple without adenopathy.,Lungs:  Clear.,ASSESSMENT:,  Allergic rhinitis.,PLAN:,1.  She will try Zyrtec instead of Allegra again.  Another option will be to use loratadine.  She does not think she has prescription coverage so that might be cheaper.,2.  Samples of Nasonex two sprays in each nostril given for three weeks.  A prescription was written as well."
+
 -----
 
 ## Question 1: What specialties do we have?
@@ -88,7 +94,8 @@ mt_samples %>%
 There are 40 unique medical specialties in this dataset. Some of these
 categories are related, as surgery is a very general medical specialty
 that includes aspects from other medical fields such as cardiology,
-OB-GYN, and neurosurgery.
+OB-GYN, and neurosurgery. The data is not evenly distributed as surgery
+was the most common medical specialty.
 
 -----
 
@@ -102,28 +109,29 @@ OB-GYN, and neurosurgery.
 
 ``` r
 mt_samples %>% 
-  unnest_tokens(token,transcription)
+  unnest_tokens(token,transcription) %>% 
+  count(token,sort =TRUE)
 ```
 
-    ## # A tibble: 2,403,596 x 3
-    ##    description                                      medical_specialty   token   
-    ##    <chr>                                            <chr>               <chr>   
-    ##  1 A 23-year-old white female presents with compla~ Allergy / Immunolo~ subject~
-    ##  2 A 23-year-old white female presents with compla~ Allergy / Immunolo~ this    
-    ##  3 A 23-year-old white female presents with compla~ Allergy / Immunolo~ 23      
-    ##  4 A 23-year-old white female presents with compla~ Allergy / Immunolo~ year    
-    ##  5 A 23-year-old white female presents with compla~ Allergy / Immunolo~ old     
-    ##  6 A 23-year-old white female presents with compla~ Allergy / Immunolo~ white   
-    ##  7 A 23-year-old white female presents with compla~ Allergy / Immunolo~ female  
-    ##  8 A 23-year-old white female presents with compla~ Allergy / Immunolo~ presents
-    ##  9 A 23-year-old white female presents with compla~ Allergy / Immunolo~ with    
-    ## 10 A 23-year-old white female presents with compla~ Allergy / Immunolo~ complai~
-    ## # ... with 2,403,586 more rows
+    ## # A tibble: 23,647 x 2
+    ##    token        n
+    ##    <chr>    <int>
+    ##  1 the     149888
+    ##  2 and      82779
+    ##  3 was      71765
+    ##  4 of       59205
+    ##  5 to       50632
+    ##  6 a        42810
+    ##  7 with     35815
+    ##  8 in       32807
+    ##  9 is       26378
+    ## 10 patient  22065
+    ## # ... with 23,637 more rows
 
 Explain what we see from this result. Does it makes sense? What insights
 (if any) do we get?
 
------
+## This result shows the words that appear with the highest frequency in the
 
 ## Question 3
 
