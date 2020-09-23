@@ -2,7 +2,7 @@ Lab 06 - Text Mining
 ================
 
 ``` r
-knitr::opts_chunk$set(eval = FALSE, include  = FALSE)
+knitr::opts_chunk$set()
 ```
 
 # Learning goals
@@ -27,10 +27,35 @@ You should load in `dplyr`, (or `data.table` if you want to work that
 way), `ggplot2` and `tidytext`. If you don’t already have `tidytext`
 then you can install with
 
+``` r
+install.packages("tidytext")
+```
+
 ### read in Medical Transcriptions
 
 Loading in reference transcription samples from
 <https://www.mtsamples.com/>
+
+``` r
+library(readr)
+library(tidyverse)
+library(tidytext)
+mt_samples <- read_csv("https://raw.githubusercontent.com/USCbiostats/data-science-data/master/00_mtsamples/mtsamples.csv")
+mt_samples <- mt_samples %>%
+  select(description, medical_specialty, transcription)
+
+head(mt_samples)
+```
+
+    ## # A tibble: 6 x 3
+    ##   description                  medical_specialty   transcription                
+    ##   <chr>                        <chr>               <chr>                        
+    ## 1 A 23-year-old white female ~ Allergy / Immunolo~ "SUBJECTIVE:,  This 23-year-~
+    ## 2 Consult for laparoscopic ga~ Bariatrics          "PAST MEDICAL HISTORY:, He h~
+    ## 3 Consult for laparoscopic ga~ Bariatrics          "HISTORY OF PRESENT ILLNESS:~
+    ## 4 2-D M-Mode. Doppler.         Cardiovascular / P~ "2-D M-MODE: , ,1.  Left atr~
+    ## 5 2-D Echocardiogram           Cardiovascular / P~ "1.  The left ventricular ca~
+    ## 6 Morbid obesity.  Laparoscop~ Bariatrics          "PREOPERATIVE DIAGNOSIS: , M~
 
 -----
 
@@ -39,6 +64,29 @@ Loading in reference transcription samples from
 We can use `count()` from `dplyr` to figure out how many different
 catagories do we have? Are these catagories related? overlapping? evenly
 distributed?
+
+``` r
+mt_samples %>%
+  count(medical_specialty, sort = TRUE)
+```
+
+    ## # A tibble: 40 x 2
+    ##    medical_specialty                 n
+    ##    <chr>                         <int>
+    ##  1 Surgery                        1103
+    ##  2 Consult - History and Phy.      516
+    ##  3 Cardiovascular / Pulmonary      372
+    ##  4 Orthopedic                      355
+    ##  5 Radiology                       273
+    ##  6 General Medicine                259
+    ##  7 Gastroenterology                230
+    ##  8 Neurology                       223
+    ##  9 SOAP / Chart / Progress Notes   166
+    ## 10 Obstetrics / Gynecology         160
+    ## # ... with 30 more rows
+
+There are 40 unique medical specialties in this dataset. Some of these
+categories are related
 
 -----
 

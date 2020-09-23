@@ -5,7 +5,7 @@ output: github_document
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(eval = FALSE, include  = FALSE)
+knitr::opts_chunk$set()
 ```
 
 # Learning goals
@@ -34,6 +34,8 @@ Loading in reference transcription samples from https://www.mtsamples.com/
 
 ```{r, warning=FALSE, message=FALSE}
 library(readr)
+library(tidyverse)
+library(tidytext)
 mt_samples <- read_csv("https://raw.githubusercontent.com/USCbiostats/data-science-data/master/00_mtsamples/mtsamples.csv")
 mt_samples <- mt_samples %>%
   select(description, medical_specialty, transcription)
@@ -49,8 +51,9 @@ We can use `count()` from `dplyr` to figure out how many different catagories do
 
 ```{r}
 mt_samples %>%
-  count(___, sort = TRUE)
+  count(medical_specialty, sort = TRUE)
 ```
+There are 40 unique medical specialties in this dataset. Some of these categories are related 
 
 ---
 
