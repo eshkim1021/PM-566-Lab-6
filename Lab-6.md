@@ -86,7 +86,9 @@ mt_samples %>%
     ## # ... with 30 more rows
 
 There are 40 unique medical specialties in this dataset. Some of these
-categories are related
+categories are related, as surgery is a very general medical specialty
+that includes aspects from other medical fields such as cardiology,
+OB-GYN, and neurosurgery.
 
 -----
 
@@ -95,6 +97,28 @@ categories are related
   - Tokenize the the words in the `transcription` column
   - Count the number of times each token appears
   - Visualize the top 20 most frequent words
+
+<!-- end list -->
+
+``` r
+mt_samples %>% 
+  unnest_tokens(token,transcription)
+```
+
+    ## # A tibble: 2,403,596 x 3
+    ##    description                                      medical_specialty   token   
+    ##    <chr>                                            <chr>               <chr>   
+    ##  1 A 23-year-old white female presents with compla~ Allergy / Immunolo~ subject~
+    ##  2 A 23-year-old white female presents with compla~ Allergy / Immunolo~ this    
+    ##  3 A 23-year-old white female presents with compla~ Allergy / Immunolo~ 23      
+    ##  4 A 23-year-old white female presents with compla~ Allergy / Immunolo~ year    
+    ##  5 A 23-year-old white female presents with compla~ Allergy / Immunolo~ old     
+    ##  6 A 23-year-old white female presents with compla~ Allergy / Immunolo~ white   
+    ##  7 A 23-year-old white female presents with compla~ Allergy / Immunolo~ female  
+    ##  8 A 23-year-old white female presents with compla~ Allergy / Immunolo~ presents
+    ##  9 A 23-year-old white female presents with compla~ Allergy / Immunolo~ with    
+    ## 10 A 23-year-old white female presents with compla~ Allergy / Immunolo~ complai~
+    ## # ... with 2,403,586 more rows
 
 Explain what we see from this result. Does it makes sense? What insights
 (if any) do we get?
