@@ -68,13 +68,15 @@ There are 40 unique medical specialties in this dataset. Some of these categorie
 ```{r}
 mt_samples %>% 
   unnest_tokens(token,transcription) %>% 
-  count(token,sort =TRUE)
+  count(token,sort =TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x = n,fct_reorder(token,n)))+
+  geom_col()
 ```
 
 Explain what we see from this result. Does it makes sense? What insights (if any) do we get?
 
-
-This result shows the words that appear with the highest frequency in the 
+This result shows the words that appear with the highest frequency in the are stopwords, such as "the", "and", and "was". They do not provide much insights into the medical care and medical history of the patient. 
 ---
 
 ## Question 3
@@ -82,19 +84,71 @@ This result shows the words that appear with the highest frequency in the
 - Redo visualization but remove stopwords before
 - Bonus points if you remove numbers as well
 
+
+```{r}
+mt_samples %>% 
+  unnest_tokens(token,transcription) %>% 
+  anti_join(stop_words, by = c("token" = "word")) %>% 
+  filter(!(token %in% as.character(seq(0,100))))%>%
+  count(token,sort =TRUE)%>% 
+  top_n(20,wt=n)%>%
+  ggplot(aes(x=n,fct_reorder(token,n)))+
+  geom_col()
+
+```
 What do we see know that we have removed stop words? Does it give us a better idea of what the text is about?
 
+Now that the stop words are removed, the remaining characters left in the graph show information that is useful and related to patient care.The words "Pain," "procedure", and "anesthesia" all appear commonly in the dataset, indicating that many patients were in pain, and have a procedure that involved anesthesia. 
 ---
 
 # Question 4
 
 repeat question 2, but this time tokenize into bi-grams. how does the result change if you look at tri-grams?
+```{r}
+mt_samples %>% 
+  unnest_ngrams(ngram,transcription,n=2) %>% 
+  count(ngram,sort =TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x = n,fct_reorder(ngram,n)))+
+  geom_col()
+```
 
+```{r}
+mt_samples %>% 
+  unnest_ngrams(ngram,transcription, n=3,n_min = 2) %>% 
+  count(ngram, sort = TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x=n, y =fct_reorder(ngram,n)))+
+  geom_col()
+```
 ---
 
 # Question 5
 
 Using the results you got from questions 4. Pick a word and count the words that appears after and before it.
+
+```{r}
+
+mt_bigrams<- mt_samples %>% 
+  unnest_ngrams(ngram,transcription,n=2,collapse=F) %>% 
+  separate(ngram, into = c("word1","word2"),sep =" ") %>% 
+  select(word1,word2)
+
+mt_bigrams %>% 
+  filter(word1 == "blood") %>% 
+  count(word2,sort = TRUE)
+
+mt_bigrams %>% 
+  filter(word2 == "blood") %>% 
+  count(word1,sort = TRUE)
+
+mt_bigrams %>% 
+  anti_join(stop_words %>% select(word),by = c("word1"="word")) %>% 
+  anti_join(stop_words %>% select(word),by = c("word2"="word"))%>%
+  count(word1,word2,sort =T)
+```
+
+
 
 ---
 
@@ -102,6 +156,16 @@ Using the results you got from questions 4. Pick a word and count the words that
 
 Which words are most used in each of the specialties. you can use `group_by()` and `top_n()` from `dplyr` to have the calculations be done within each specialty. Remember to remove stopwords. How about the most 5 used words?
 
+```{r}
+mt_samples %>% 
+  unnest_tokens(token,transcription) %>% 
+  anti_join(stop_words, by = c("token" = "word")) %>% 
+  filter(!(token %in% as.character(seq(0,100))))%>%
+  group_by(medical_specialty) %>%
+  count(token)%>% 
+  top_n(5,wt=n)
+
+```
 # Question 7 - extra
 
 Find your own insight in the data:

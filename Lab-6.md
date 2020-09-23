@@ -110,50 +110,143 @@ was the most common medical specialty.
 ``` r
 mt_samples %>% 
   unnest_tokens(token,transcription) %>% 
-  count(token,sort =TRUE)
+  count(token,sort =TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x = n,fct_reorder(token,n)))+
+  geom_col()
 ```
 
-    ## # A tibble: 23,647 x 2
-    ##    token        n
-    ##    <chr>    <int>
-    ##  1 the     149888
-    ##  2 and      82779
-    ##  3 was      71765
-    ##  4 of       59205
-    ##  5 to       50632
-    ##  6 a        42810
-    ##  7 with     35815
-    ##  8 in       32807
-    ##  9 is       26378
-    ## 10 patient  22065
-    ## # ... with 23,637 more rows
+![](Lab-6_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 Explain what we see from this result. Does it makes sense? What insights
 (if any) do we get?
 
-## This result shows the words that appear with the highest frequency in the
+## This result shows the words that appear with the highest frequency in the are stopwords, such as “the”, “and”, and “was”. They do not provide much insights into the medical care and medical history of the patient.
 
 ## Question 3
 
   - Redo visualization but remove stopwords before
   - Bonus points if you remove numbers as well
 
-What do we see know that we have removed stop words? Does it give us a
-better idea of what the text is about?
+<!-- end list -->
 
------
+``` r
+mt_samples %>% 
+  unnest_tokens(token,transcription) %>% 
+  anti_join(stop_words, by = c("token" = "word")) %>% 
+  filter(!(token %in% as.character(seq(0,100))))%>%
+  count(token,sort =TRUE)%>% 
+  top_n(20,wt=n)%>%
+  ggplot(aes(x=n,fct_reorder(token,n)))+
+  geom_col()
+```
+
+![](Lab-6_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> What do we see
+know that we have removed stop words? Does it give us a better idea of
+what the text is about?
+
+## Now that the stop words are removed, the remaining characters left in the graph show information that is useful and related to patient care.The words “Pain,” “procedure”, and “anesthesia” all appear commonly in the dataset, indicating that many patients were in pain, and have a procedure that involved anesthesia.
 
 # Question 4
 
 repeat question 2, but this time tokenize into bi-grams. how does the
 result change if you look at tri-grams?
 
------
+``` r
+mt_samples %>% 
+  unnest_ngrams(ngram,transcription,n=2) %>% 
+  count(ngram,sort =TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x = n,fct_reorder(ngram,n)))+
+  geom_col()
+```
+
+![](Lab-6_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
+mt_samples %>% 
+  unnest_ngrams(ngram,transcription, n=3,n_min = 2) %>% 
+  count(ngram, sort = TRUE)%>% 
+  top_n(20,wt=n) %>% 
+  ggplot(aes(x=n, y =fct_reorder(ngram,n)))+
+  geom_col()
+```
+
+## ![](Lab-6_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 # Question 5
 
 Using the results you got from questions 4. Pick a word and count the
 words that appears after and before it.
+
+``` r
+mt_bigrams<- mt_samples %>% 
+  unnest_ngrams(ngram,transcription,n=2,collapse=F) %>% 
+  separate(ngram, into = c("word1","word2"),sep =" ") %>% 
+  select(word1,word2)
+
+mt_bigrams %>% 
+  filter(word1 == "blood") %>% 
+  count(word2,sort = TRUE)
+```
+
+    ## # A tibble: 161 x 2
+    ##    word2        n
+    ##    <chr>    <int>
+    ##  1 pressure  1265
+    ##  2 loss       965
+    ##  3 cell       130
+    ##  4 in         114
+    ##  5 cells      112
+    ##  6 sugar       91
+    ##  7 and         84
+    ##  8 sugars      79
+    ##  9 was         65
+    ## 10 cultures    53
+    ## # ... with 151 more rows
+
+``` r
+mt_bigrams %>% 
+  filter(word2 == "blood") %>% 
+  count(word1,sort = TRUE)
+```
+
+    ## # A tibble: 439 x 2
+    ##    word1         n
+    ##    <chr>     <int>
+    ##  1 estimated   754
+    ##  2 white       180
+    ##  3 signs       170
+    ##  4 and         154
+    ##  5 of          149
+    ##  6 red         123
+    ##  7 her         116
+    ##  8 his          99
+    ##  9 the          96
+    ## 10 no           72
+    ## # ... with 429 more rows
+
+``` r
+mt_bigrams %>% 
+  anti_join(stop_words %>% select(word),by = c("word1"="word")) %>% 
+  anti_join(stop_words %>% select(word),by = c("word2"="word"))%>%
+  count(word1,word2,sort =T)
+```
+
+    ## # A tibble: 128,018 x 3
+    ##    word1         word2           n
+    ##    <chr>         <chr>       <int>
+    ##  1 0             vicryl       1802
+    ##  2 blood         pressure     1265
+    ##  3 medical       history      1223
+    ##  4 diagnoses     1            1192
+    ##  5 preoperative  diagnosis    1176
+    ##  6 physical      examination  1156
+    ##  7 4             0            1123
+    ##  8 vital         signs        1121
+    ##  9 past          medical      1113
+    ## 10 postoperative diagnosis    1092
+    ## # ... with 128,008 more rows
 
 -----
 
@@ -163,6 +256,32 @@ Which words are most used in each of the specialties. you can use
 `group_by()` and `top_n()` from `dplyr` to have the calculations be done
 within each specialty. Remember to remove stopwords. How about the most
 5 used words?
+
+``` r
+mt_samples %>% 
+  unnest_tokens(token,transcription) %>% 
+  anti_join(stop_words, by = c("token" = "word")) %>% 
+  filter(!(token %in% as.character(seq(0,100))))%>%
+  group_by(medical_specialty) %>%
+  count(token)%>% 
+  top_n(5,wt=n)
+```
+
+    ## # A tibble: 210 x 3
+    ## # Groups:   medical_specialty [40]
+    ##    medical_specialty    token         n
+    ##    <chr>                <chr>     <int>
+    ##  1 Allergy / Immunology allergies    21
+    ##  2 Allergy / Immunology history      38
+    ##  3 Allergy / Immunology nasal        13
+    ##  4 Allergy / Immunology noted        23
+    ##  5 Allergy / Immunology past         13
+    ##  6 Allergy / Immunology patient      22
+    ##  7 Autopsy              anterior     47
+    ##  8 Autopsy              body         40
+    ##  9 Autopsy              inch         59
+    ## 10 Autopsy              left         83
+    ## # ... with 200 more rows
 
 # Question 7 - extra
 
